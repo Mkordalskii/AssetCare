@@ -1,0 +1,36 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: assetcare_php
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:17-alpine
+    container_name: assetcare_database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-assetcare}
+      POSTGRES_USER: ${POSTGRES_USER:-assetcare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-assetcare}
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-assetcare} -d ${POSTGRES_DB:-assetcare}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  database_data:
