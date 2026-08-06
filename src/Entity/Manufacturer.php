@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\ManufacturerRepository;
@@ -38,7 +40,7 @@ class Manufacturer
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
-    
+
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
@@ -135,6 +137,13 @@ class Manufacturer
     public function activate(): static
     {
         $this->isActive = true;
+
+        return $this;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
 
         return $this;
     }

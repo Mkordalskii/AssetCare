@@ -49,7 +49,7 @@ final class ManufacturerType extends AbstractType
                 ],
             ])
             ->add('save', SubmitType::class, [
-                'label' => 'Save manufacturer',
+                'label' => $options['submit_label'],
                 'attr' => [
                     'class' => 'btn btn-primary',
                 ],
@@ -60,6 +60,8 @@ final class ManufacturerType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Manufacturer::class,
+            'submit_label' => 'Save manufacturer',
         ]);
+        $resolver->setAllowedTypes('submit_label', 'string');
     }
 }

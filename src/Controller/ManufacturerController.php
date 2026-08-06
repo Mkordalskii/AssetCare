@@ -54,4 +54,36 @@ final class ManufacturerController extends AbstractController
             'form' => $form,
         ]);
     }
+    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Manufacturer $manufacturer,
+        Request $request,
+        ManufacturerService $manufacturerService
+    ): Response {
+        $form = $this->createForm(
+            ManufacturerType::class,
+            $manufacturer,
+            [
+                'submit_label' => 'Update manufacturer',
+            ]
+        );
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $manufacturerService->updateManufacturer($manufacturer);
+
+            $this->addFlash(
+                'success',
+                'Manufacturer was updated successfully.'
+            );
+
+            return $this->redirectToRoute('app_manufacturer_index');
+        }
+
+        return $this->render('manufacturer/edit.html.twig', [
+            'form' => $form,
+            'manufacturer' => $manufacturer,
+        ]);
+    }
 }
