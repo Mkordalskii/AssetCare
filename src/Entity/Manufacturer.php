@@ -1,9 +1,10 @@
 <?php
-
+declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\ManufacturerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ManufacturerRepository::class)]
 class Manufacturer
@@ -14,15 +15,25 @@ class Manufacturer
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Manufacturer name is required.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Manufacturer name cannot exceed {{ limit }} characters.',
+    )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Enter a valid website URL.')]
+    #[Assert\Length(max: 255)]
     private ?string $website = null;
 
     #[ORM\Column(length: 180, nullable: true)]
+    #[Assert\Email(message: 'Enter a valid support email address.')]
+    #[Assert\Length(max: 180)]
     private ?string $supportEmail = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
     private ?string $supportPhone = null;
 
     #[ORM\Column]
@@ -30,6 +41,9 @@ class Manufacturer
     
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\Column]
+    private bool $isActive = true;
 
     public function __construct()
     {
@@ -109,6 +123,25 @@ class Manufacturer
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function activate(): static
+    {
+        $this->isActive = true;
+
+        return $this;
+    }
+
+    public function deactivate(): static
+    {
+        $this->isActive = false;
 
         return $this;
     }

@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add manufacturer | AssetCare{% endblock %}
+
+{% block body %}
+    <div class="mb-4">
+        <h1>Add manufacturer</h1>
+
+        <p class="text-muted">
+            Add a manufacturer that can be assigned to assets.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+
+                {{ form_row(form.name) }}
+                {{ form_row(form.website) }}
+                {{ form_row(form.supportEmail) }}
+                {{ form_row(form.supportPhone) }}
+
+                <div class="d-flex gap-2 mt-4">
+                    {{ form_widget(form.save) }}
+
+                    <a
+                        href="{{ path('app_manufacturer_index') }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancel
+                    </a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

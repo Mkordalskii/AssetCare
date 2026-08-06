@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Manufacturer;
@@ -14,6 +14,18 @@ class ManufacturerRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Manufacturer::class);
+    }
+    /**
+     * @return Manufacturer[] Returns an array of Manufacturer objects
+     */
+    public function findAllActive(): array
+    {
+        return $this->createQueryBuilder('manufacturer')
+            ->andWhere('manufacturer.isActive = :isActive')
+            ->setParameter('isActive', true)
+            ->orderBy('manufacturer.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**
