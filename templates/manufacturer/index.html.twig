@@ -53,6 +53,13 @@
 								<a href="{{ path('app_manufacturer_edit', { id: manufacturer.id }) }}" class="btn btn-sm btn-outline-primary">
 									Edit
 								</a>
+								<form method="post" action="{{ path('app_manufacturer_delete', { id: manufacturer.id }) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');">
+									<input type="hidden" name="_token" value="{{ csrf_token('delete_manufacturer_' ~ manufacturer.id) }}">
+
+									<button type="submit" class="btn btn-sm btn-outline-danger">
+										Delete
+									</button>
+								</form>
 							</td>
 						</tr>
 					{% endfor %}

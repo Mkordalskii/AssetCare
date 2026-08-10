@@ -86,4 +86,28 @@ final class ManufacturerController extends AbstractController
             'manufacturer' => $manufacturer,
         ]);
     }
+    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    public function delete(
+        Manufacturer $manufacturer,
+        Request $request,
+        ManufacturerService $manufacturerService
+    ): Response {
+        if (!$this->isCsrfTokenValid(
+            'delete_manufacturer_' . $manufacturer->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException(
+                'Invalid CSRF token.'
+            );
+        }
+
+        $manufacturerService->deactivateManufacturer($manufacturer);
+
+        $this->addFlash(
+            'success',
+            'Manufacturer was deactivated successfully.'
+        );
+
+        return $this->redirectToRoute('app_manufacturer_index');
+    }
 }
