@@ -27,6 +27,15 @@ class ManufacturerRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findAllInactive(): array
+    {
+        return $this->createQueryBuilder('manufacturer')
+            ->andWhere('manufacturer.isActive = :isActive')
+            ->setParameter('isActive', false)
+            ->orderBy('manufacturer.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
     //    /**
     //     * @return Manufacturer[] Returns an array of Manufacturer objects

@@ -17,12 +17,22 @@ use App\Entity\Manufacturer;
 final class ManufacturerController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(ManufacturerRepository $manufacturerRepository): Response
-    {
-        $manufacturers = $manufacturerRepository->findAllActive();
+    public function index(
+        Request $request,
+        ManufacturerRepository $manufacturerRepository
+    ): Response {
+        $status = $request->query->get('status', 'active');
+
+        if ($status === 'inactive') {
+            $manufacturers = $manufacturerRepository->findAllInactive();
+        } else {
+            $manufacturers = $manufacturerRepository->findAllActive();
+            $status = 'active';
+        }
 
         return $this->render('manufacturer/index.html.twig', [
             'manufacturers' => $manufacturers,
+            'status' => $status,
         ]);
     }
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
@@ -109,5 +119,32 @@ final class ManufacturerController extends AbstractController
         );
 
         return $this->redirectToRoute('app_manufacturer_index');
+    }
+    #[Route('/{id}/restore', name: 'restore', methods: ['POST'])]
+    public function restore(
+        Manufacturer $manufacturer,
+        Request $request,
+        ManufacturerService $manufacturerService
+    ): Response {
+        if (!$this->isCsrfTokenValid(
+            'restore_manufacturer_' . $manufacturer->getId(),
+            $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException(
+                'Invalid CSRF token.'
+            );
+        }
+
+        $manufacturerService->activateManufacturer($manufacturer);
+
+        $this->addFlash(
+            'success',
+            'Manufacturer was restored successfully.'
+        );
+
+        return $this->redirectToRoute(
+            'app_manufacturer_index',
+            ['status' => 'inactive']
+        );
     }
 }

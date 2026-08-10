@@ -1,70 +1,170 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Manufacturers | AssetCare
-{% endblock %}
+{% block title %}Manufacturers | AssetCare{% endblock %}
 
 {% block body %}
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<div>
-			<h1>Manufacturers</h1>
-			<p class="text-muted mb-0">
-				Manage manufacturers assigned to your assets.
-			</p>
-		</div>
 
-		<a href="{{ path('app_manufacturer_create') }}" class="btn btn-primary">Add manufacturer</a>
-	</div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Manufacturers</h1>
 
-	{% if manufacturers is empty %}
-		<div class="alert alert-info">
-			No manufacturers have been added yet.
-		</div>
-	{% else %}
-		<div class="table-responsive">
-			<table class="table table-striped align-middle">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Website</th>
-						<th>Support email</th>
-						<th>Support phone</th>
-						<th class="text-end">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for manufacturer in manufacturers %}
-						<tr>
-							<td>{{ manufacturer.name }}</td>
+            <p class="text-muted mb-0">
+                Manage manufacturers assigned to your assets.
+            </p>
+        </div>
 
-							<td>
-								{% if manufacturer.website %}
-									<a href="{{ manufacturer.website }}" target="_blank" rel="noopener noreferrer">
-										{{ manufacturer.website }}
-									</a>
-								{% else %}
-									—
-								{% endif %}
-							</td>
+        <a
+            href="{{ path('app_manufacturer_create') }}"
+            class="btn btn-primary"
+        >
+            Add manufacturer
+        </a>
+    </div>
 
-							<td>{{ manufacturer.supportEmail ?? '—' }}</td>
-							<td>{{ manufacturer.supportPhone ?? '—' }}</td>
+    <div class="mb-4">
+        <a
+            href="{{ path('app_manufacturer_index') }}"
+            class="btn {{ status == 'active' ? 'btn-primary' : 'btn-outline-primary' }}"
+        >
+            Active
+        </a>
 
-							<td class="text-end">
-								<a href="{{ path('app_manufacturer_edit', { id: manufacturer.id }) }}" class="btn btn-sm btn-outline-primary">
-									Edit
-								</a>
-								<form method="post" action="{{ path('app_manufacturer_delete', { id: manufacturer.id }) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');">
-									<input type="hidden" name="_token" value="{{ csrf_token('delete_manufacturer_' ~ manufacturer.id) }}">
+        <a
+            href="{{ path('app_manufacturer_index', { status: 'inactive' }) }}"
+            class="btn {{ status == 'inactive' ? 'btn-primary' : 'btn-outline-primary' }}"
+        >
+            Inactive
+        </a>
+    </div>
 
-									<button type="submit" class="btn btn-sm btn-outline-danger">
-										Delete
-									</button>
-								</form>
-							</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	{% endif %}
+    {% if manufacturers is empty %}
+
+        <div class="alert alert-info">
+            {% if status == 'inactive' %}
+                No inactive manufacturers.
+            {% else %}
+                No manufacturers have been added yet.
+            {% endif %}
+        </div>
+
+    {% else %}
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Website</th>
+                        <th>Support email</th>
+                        <th>Support phone</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for manufacturer in manufacturers %}
+
+                        <tr>
+                            <td>
+                                {{ manufacturer.name }}
+                            </td>
+
+                            <td>
+                                {% if manufacturer.website %}
+                                    <a
+                                        href="{{ manufacturer.website }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ manufacturer.website }}
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ manufacturer.supportEmail ?? '—' }}
+                            </td>
+
+                            <td>
+                                {{ manufacturer.supportPhone ?? '—' }}
+                            </td>
+
+                            <td class="text-end">
+
+                                {% if manufacturer.isActive %}
+
+                                    <a
+                                        href="{{ path('app_manufacturer_edit', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_manufacturer_delete', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token(
+                                                'delete_manufacturer_' ~ manufacturer.id
+                                            ) }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+
+                                {% else %}
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_manufacturer_restore', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="d-inline"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token(
+                                                'restore_manufacturer_' ~ manufacturer.id
+                                            ) }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-success"
+                                        >
+                                            Restore
+                                        </button>
+                                    </form>
+
+                                {% endif %}
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    {% endif %}
+
 {% endblock %}
