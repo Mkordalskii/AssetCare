@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Manufacturer;
@@ -18,24 +20,43 @@ class ManufacturerRepository extends ServiceEntityRepository
     /**
      * @return Manufacturer[] Returns an array of Manufacturer objects
      */
-    public function findAllActive(): array
-    {
-        return $this->createQueryBuilder('manufacturer')
+    public function findByFilters(
+        bool $isActive,
+        ?string $query = null
+    ): array {
+        $qb = $this->createQueryBuilder('manufacturer')
             ->andWhere('manufacturer.isActive = :isActive')
-            ->setParameter('isActive', true)
-            ->orderBy('manufacturer.name', 'ASC')
+            ->setParameter('isActive', $isActive)
+            ->orderBy('manufacturer.name', 'ASC');
+
+        if ($query !== null && $query !== '') {
+            $qb
+                ->andWhere('LOWER(manufacturer.name) LIKE LOWER(:query)')
+                ->setParameter('query', '%' . $query . '%');
+        }
+
+        return $qb
             ->getQuery()
             ->getResult();
     }
-    public function findAllInactive(): array
-    {
-        return $this->createQueryBuilder('manufacturer')
-            ->andWhere('manufacturer.isActive = :isActive')
-            ->setParameter('isActive', false)
-            ->orderBy('manufacturer.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
+    // public function findAllActive(): array
+    // {
+    //     return $this->createQueryBuilder('manufacturer')
+    //         ->andWhere('manufacturer.isActive = :isActive')
+    //         ->setParameter('isActive', true)
+    //         ->orderBy('manufacturer.name', 'ASC')
+    //         ->getQuery()
+    //         ->getResult();
+    // }
+    // public function findAllInactive(): array
+    // {
+    //     return $this->createQueryBuilder('manufacturer')
+    //         ->andWhere('manufacturer.isActive = :isActive')
+    //         ->setParameter('isActive', false)
+    //         ->orderBy('manufacturer.name', 'ASC')
+    //         ->getQuery()
+    //         ->getResult();
+    // }
 
     //    /**
     //     * @return Manufacturer[] Returns an array of Manufacturer objects

@@ -22,17 +22,19 @@ final class ManufacturerController extends AbstractController
         ManufacturerRepository $manufacturerRepository
     ): Response {
         $status = $request->query->get('status', 'active');
+        $query = trim((string) $request->query->get('q', ''));
 
-        if ($status === 'inactive') {
-            $manufacturers = $manufacturerRepository->findAllInactive();
-        } else {
-            $manufacturers = $manufacturerRepository->findAllActive();
-            $status = 'active';
-        }
+        $isActive = $status !== 'inactive';
+
+        $manufacturers = $manufacturerRepository->findByFilters(
+            $isActive,
+            $query
+        );
 
         return $this->render('manufacturer/index.html.twig', [
             'manufacturers' => $manufacturers,
-            'status' => $status,
+            'status' => $isActive ? 'active' : 'inactive',
+            'query' => $query,
         ]);
     }
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]

@@ -1,170 +1,143 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Manufacturers | AssetCare{% endblock %}
+{% block title %}Manufacturers | AssetCare
+{% endblock %}
 
 {% block body %}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1>Manufacturers</h1>
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h1>Manufacturers</h1>
 
-            <p class="text-muted mb-0">
-                Manage manufacturers assigned to your assets.
-            </p>
-        </div>
+			<p class="text-muted mb-0">
+				Manage manufacturers assigned to your assets.
+			</p>
+		</div>
 
-        <a
-            href="{{ path('app_manufacturer_create') }}"
-            class="btn btn-primary"
-        >
-            Add manufacturer
-        </a>
-    </div>
+		<a href="{{ path('app_manufacturer_create') }}" class="btn btn-primary">
+			Add manufacturer
+		</a>
+	</div>
+    <form method="get" action="{{ path('app_manufacturer_index') }}" class="row g-2 mb-4">
+			<input type="hidden" name="status" value="{{ status }}">
 
-    <div class="mb-4">
-        <a
-            href="{{ path('app_manufacturer_index') }}"
-            class="btn {{ status == 'active' ? 'btn-primary' : 'btn-outline-primary' }}"
-        >
-            Active
-        </a>
+			<div class="col-md-3">
+				<input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search">
+			</div>
 
-        <a
-            href="{{ path('app_manufacturer_index', { status: 'inactive' }) }}"
-            class="btn {{ status == 'inactive' ? 'btn-primary' : 'btn-outline-primary' }}"
-        >
-            Inactive
-        </a>
-    </div>
+			<div class="col-auto">
+				<button type="submit" class="btn btn-outline-primary">
+					Search
+				</button>
+			</div>
 
-    {% if manufacturers is empty %}
+			{% if query %}
+				<div class="col-auto">
+					<a href="{{ path('app_manufacturer_index', { status: status }) }}" class="btn btn-outline-secondary">
+						Clear
+					</a>
+				</div>
+			{% endif %}
+		</form>
 
-        <div class="alert alert-info">
-            {% if status == 'inactive' %}
-                No inactive manufacturers.
-            {% else %}
-                No manufacturers have been added yet.
-            {% endif %}
-        </div>
+	<div class="mb-4">
+		<a href="{{ path('app_manufacturer_index') }}" class="btn {{ status == 'active' ? 'btn-primary' : 'btn-outline-primary' }}">
+			Active
+		</a>
 
-    {% else %}
+		<a href="{{ path('app_manufacturer_index', { status: 'inactive' }) }}" class="btn {{ status == 'inactive' ? 'btn-primary' : 'btn-outline-primary' }}">
+			Inactive
+		</a>
+	</div>
 
-        <div class="table-responsive">
-            <table class="table table-striped align-middle">
+	{% if manufacturers is empty %}
 
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Website</th>
-                        <th>Support email</th>
-                        <th>Support phone</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+		<div class="alert alert-info">
+			{% if status == 'inactive' %}
+				No inactive manufacturers.
+			{% else %}
+				No manufacturers have been added yet.
+			{% endif %}
+		</div>
 
-                <tbody>
-                    {% for manufacturer in manufacturers %}
+	{% else %}
 
-                        <tr>
-                            <td>
-                                {{ manufacturer.name }}
-                            </td>
+		<div class="table-responsive">
+			<table class="table table-striped align-middle">
 
-                            <td>
-                                {% if manufacturer.website %}
-                                    <a
-                                        href="{{ manufacturer.website }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {{ manufacturer.website }}
-                                    </a>
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </td>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Website</th>
+						<th>Support email</th>
+						<th>Support phone</th>
+						<th class="text-end">Actions</th>
+					</tr>
+				</thead>
 
-                            <td>
-                                {{ manufacturer.supportEmail ?? '—' }}
-                            </td>
+				<tbody>
+					{% for manufacturer in manufacturers %}
 
-                            <td>
-                                {{ manufacturer.supportPhone ?? '—' }}
-                            </td>
+						<tr>
+							<td>
+								{{ manufacturer.name }}
+							</td>
 
-                            <td class="text-end">
+							<td>
+								{% if manufacturer.website %}
+									<a href="{{ manufacturer.website }}" target="_blank" rel="noopener noreferrer">
+										{{ manufacturer.website }}
+									</a>
+								{% else %}
+									—
+								{% endif %}
+							</td>
 
-                                {% if manufacturer.isActive %}
+							<td>
+								{{ manufacturer.supportEmail ?? '—' }}
+							</td>
 
-                                    <a
-                                        href="{{ path('app_manufacturer_edit', {
-                                            id: manufacturer.id
-                                        }) }}"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        Edit
-                                    </a>
+							<td>
+								{{ manufacturer.supportPhone ?? '—' }}
+							</td>
 
-                                    <form
-                                        method="post"
-                                        action="{{ path('app_manufacturer_delete', {
-                                            id: manufacturer.id
-                                        }) }}"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');"
-                                    >
-                                        <input
-                                            type="hidden"
-                                            name="_token"
-                                            value="{{ csrf_token(
-                                                'delete_manufacturer_' ~ manufacturer.id
-                                            ) }}"
-                                        >
+							<td class="text-end">
 
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-outline-danger"
-                                        >
-                                            Delete
-                                        </button>
-                                    </form>
+								{% if manufacturer.isActive %}
 
-                                {% else %}
+									<a href="{{ path('app_manufacturer_edit', { id: manufacturer.id }) }}" class="btn btn-sm btn-outline-primary">
+										Edit
+									</a>
 
-                                    <form
-                                        method="post"
-                                        action="{{ path('app_manufacturer_restore', {
-                                            id: manufacturer.id
-                                        }) }}"
-                                        class="d-inline"
-                                    >
-                                        <input
-                                            type="hidden"
-                                            name="_token"
-                                            value="{{ csrf_token(
-                                                'restore_manufacturer_' ~ manufacturer.id
-                                            ) }}"
-                                        >
+									<form method="post" action="{{ path('app_manufacturer_delete', { id: manufacturer.id }) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');">
+										<input type="hidden" name="_token" value="{{ csrf_token( 'delete_manufacturer_' ~ manufacturer.id ) }}">
 
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-outline-success"
-                                        >
-                                            Restore
-                                        </button>
-                                    </form>
+										<button type="submit" class="btn btn-sm btn-outline-danger">
+											Delete
+										</button>
+									</form>
 
-                                {% endif %}
+								{% else %}
 
-                            </td>
-                        </tr>
+									<form method="post" action="{{ path('app_manufacturer_restore', { id: manufacturer.id }) }}" class="d-inline">
+										<input type="hidden" name="_token" value="{{ csrf_token( 'restore_manufacturer_' ~ manufacturer.id ) }}">
 
-                    {% endfor %}
-                </tbody>
+										<button type="submit" class="btn btn-sm btn-outline-success">
+											Restore
+										</button>
+									</form>
 
-            </table>
-        </div>
+								{% endif %}
 
-    {% endif %}
+							</td>
+						</tr>
+
+					{% endfor %}
+				</tbody>
+
+			</table>
+		</div>
+
+	{% endif %}
 
 {% endblock %}
