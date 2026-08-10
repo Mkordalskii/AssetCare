@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Manufacturer;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Manufacturer>
@@ -18,11 +19,18 @@ class ManufacturerRepository extends ServiceEntityRepository
         parent::__construct($registry, Manufacturer::class);
     }
     /**
-     * @return Manufacturer[] Returns an array of Manufacturer objects
+     * @return array{
+     *     items: Manufacturer[],
+     *     total: int,
+     *     page: int,
+     *     pages: int
+     * }
      */
     public function findByFilters(
         bool $isActive,
-        ?string $query = null
+        ?string $query,
+        int $page,
+        int $limit = 10
     ): array {
         $qb = $this->createQueryBuilder('manufacturer')
             ->andWhere('manufacturer.isActive = :isActive')
@@ -35,9 +43,23 @@ class ManufacturerRepository extends ServiceEntityRepository
                 ->setParameter('query', '%' . $query . '%');
         }
 
-        return $qb
-            ->getQuery()
-            ->getResult();
+        $page = max(1, $page);
+
+        $qb
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($qb);
+
+        $total = count($paginator);
+        $pages = max(1, (int) ceil($total / $limit));
+
+        return [
+            'items' => iterator_to_array($paginator),
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+        ];
     }
     // public function findAllActive(): array
     // {

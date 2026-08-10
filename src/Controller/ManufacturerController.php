@@ -17,26 +17,32 @@ use App\Entity\Manufacturer;
 final class ManufacturerController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(
-        Request $request,
-        ManufacturerRepository $manufacturerRepository
-    ): Response {
-        $status = $request->query->get('status', 'active');
-        $query = trim((string) $request->query->get('q', ''));
+public function index(
+    Request $request,
+    ManufacturerRepository $manufacturerRepository
+): Response {
+    $status = $request->query->get('status', 'active');
+    $query = trim((string) $request->query->get('q', ''));
+    $page = max(1, $request->query->getInt('page', 1));
 
-        $isActive = $status !== 'inactive';
+    $isActive = $status !== 'inactive';
 
-        $manufacturers = $manufacturerRepository->findByFilters(
-            $isActive,
-            $query
-        );
+    $result = $manufacturerRepository->findByFilters(
+        $isActive,
+        $query,
+        $page,
+        10
+    );
 
-        return $this->render('manufacturer/index.html.twig', [
-            'manufacturers' => $manufacturers,
-            'status' => $isActive ? 'active' : 'inactive',
-            'query' => $query,
-        ]);
-    }
+    return $this->render('manufacturer/index.html.twig', [
+        'manufacturers' => $result['items'],
+        'status' => $isActive ? 'active' : 'inactive',
+        'query' => $query,
+        'page' => $result['page'],
+        'pages' => $result['pages'],
+        'total' => $result['total'],
+    ]);
+}
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function create(
         Request $request,
