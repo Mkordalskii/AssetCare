@@ -1,0 +1,294 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manufacturers | AssetCare{% endblock %}
+
+{% block body %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Manufacturers</h1>
+
+            <p class="text-muted mb-0">
+                Manage manufacturers assigned to your assets.
+            </p>
+        </div>
+
+        <a
+            href="{{ path('app_manufacturer_create') }}"
+            class="btn btn-primary"
+        >
+            Add manufacturer
+        </a>
+    </div>
+
+    <div class="mb-4">
+        <a
+            href="{{ path('app_manufacturer_index', {
+                status: 'active',
+                q: query
+            }) }}"
+            class="btn {{ status == 'active'
+                ? 'btn-primary'
+                : 'btn-outline-primary'
+            }}"
+        >
+            Active
+        </a>
+
+        <a
+            href="{{ path('app_manufacturer_index', {
+                status: 'inactive',
+                q: query
+            }) }}"
+            class="btn {{ status == 'inactive'
+                ? 'btn-primary'
+                : 'btn-outline-primary'
+            }}"
+        >
+            Inactive
+        </a>
+    </div>
+
+    <form
+        method="get"
+        action="{{ path('app_manufacturer_index') }}"
+        class="row g-2 mb-4"
+    >
+        <input
+            type="hidden"
+            name="status"
+            value="{{ status }}"
+        >
+
+        <div class="col-md-3">
+            <input
+                type="search"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="Search manufacturers..."
+            >
+        </div>
+
+        <div class="col-auto">
+            <button
+                type="submit"
+                class="btn btn-outline-primary"
+            >
+                Search
+            </button>
+        </div>
+
+        {% if query %}
+            <div class="col-auto">
+                <a
+                    href="{{ path('app_manufacturer_index', {
+                        status: status
+                    }) }}"
+                    class="btn btn-outline-secondary"
+                >
+                    Clear
+                </a>
+            </div>
+        {% endif %}
+    </form>
+
+    <p class="text-muted">
+        {{ total }} manufacturer{{ total == 1 ? '' : 's' }} found.
+    </p>
+
+    {% if manufacturers is empty %}
+
+        <div class="alert alert-info">
+            {% if query %}
+                No manufacturers matching "{{ query }}" were found.
+            {% elseif status == 'inactive' %}
+                No inactive manufacturers.
+            {% else %}
+                No manufacturers have been added yet.
+            {% endif %}
+        </div>
+
+    {% else %}
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Website</th>
+                        <th>Support email</th>
+                        <th>Support phone</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for manufacturer in manufacturers %}
+
+                        <tr>
+                            <td>{{ manufacturer.name }}</td>
+
+                            <td>
+                                {% if manufacturer.website %}
+                                    <a
+                                        href="{{ manufacturer.website }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ manufacturer.website }}
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ manufacturer.supportEmail ?? '—' }}
+                            </td>
+
+                            <td>
+                                {{ manufacturer.supportPhone ?? '—' }}
+                            </td>
+
+                            <td class="text-end">
+
+                                {% if manufacturer.isActive %}
+
+                                    <a
+                                        href="{{ path('app_manufacturer_edit', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_manufacturer_delete', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to deactivate this manufacturer?');"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token(
+                                                'delete_manufacturer_' ~ manufacturer.id
+                                            ) }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+
+                                {% else %}
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_manufacturer_restore', {
+                                            id: manufacturer.id
+                                        }) }}"
+                                        class="d-inline"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token(
+                                                'restore_manufacturer_' ~ manufacturer.id
+                                            ) }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-success"
+                                        >
+                                            Restore
+                                        </button>
+                                    </form>
+
+                                {% endif %}
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% if pages > 1 %}
+            <nav
+                class="mt-4"
+                aria-label="Manufacturer pagination"
+            >
+                <ul class="pagination">
+
+                    <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
+                        {% if page > 1 %}
+                            <a
+                                class="page-link"
+                                href="{{ path('app_manufacturer_index', {
+                                    status: status,
+                                    q: query,
+                                    page: page - 1
+                                }) }}"
+                            >
+                                Previous
+                            </a>
+                        {% else %}
+                            <span class="page-link">
+                                Previous
+                            </span>
+                        {% endif %}
+                    </li>
+
+                    {% for currentPage in 1..pages %}
+                        <li class="page-item {{ currentPage == page ? 'active' : '' }}">
+                            <a
+                                class="page-link"
+                                href="{{ path('app_manufacturer_index', {
+                                    status: status,
+                                    q: query,
+                                    page: currentPage
+                                }) }}"
+                            >
+                                {{ currentPage }}
+                            </a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {{ page >= pages ? 'disabled' : '' }}">
+                        {% if page < pages %}
+                            <a
+                                class="page-link"
+                                href="{{ path('app_manufacturer_index', {
+                                    status: status,
+                                    q: query,
+                                    page: page + 1
+                                }) }}"
+                            >
+                                Next
+                            </a>
+                        {% else %}
+                            <span class="page-link">
+                                Next
+                            </span>
+                        {% endif %}
+                    </li>
+
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% endif %}
+
+{% endblock %}
