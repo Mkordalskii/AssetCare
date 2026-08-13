@@ -94,7 +94,9 @@
     </form>
 
     <p class="text-muted">
-        {{ total }} manufacturer{{ total == 1 ? '' : 's' }} found.
+        {{ manufacturers|length }}
+        manufacturer{{ manufacturers|length == 1 ? '' : 's' }}
+        found.
     </p>
 
     {% if manufacturers is empty %}
@@ -128,7 +130,9 @@
                     {% for manufacturer in manufacturers %}
 
                         <tr>
-                            <td>{{ manufacturer.name }}</td>
+                            <td>
+                                {{ manufacturer.name }}
+                            </td>
 
                             <td>
                                 {% if manufacturer.website %}
@@ -225,21 +229,22 @@
             </table>
         </div>
 
-        {% if pages > 1 %}
+        {% if totalPages > 1 %}
             <nav
                 class="mt-4"
                 aria-label="Manufacturer pagination"
             >
                 <ul class="pagination">
 
-                    <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
-                        {% if page > 1 %}
+                    <li class="page-item {{ currentPage <= 1 ? 'disabled' : '' }}">
+
+                        {% if previous >= 0 %}
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    page: page - 1
+                                    offset: previous
                                 }) }}"
                             >
                                 Previous
@@ -249,31 +254,37 @@
                                 Previous
                             </span>
                         {% endif %}
+
                     </li>
 
-                    {% for currentPage in 1..pages %}
-                        <li class="page-item {{ currentPage == page ? 'active' : '' }}">
+                    {% for pageNumber in 1..totalPages %}
+
+                        {% set pageOffset = (pageNumber - 1) * perPage %}
+
+                        <li class="page-item {{ pageNumber == currentPage ? 'active' : '' }}">
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    page: currentPage
+                                    offset: pageOffset
                                 }) }}"
                             >
-                                {{ currentPage }}
+                                {{ pageNumber }}
                             </a>
                         </li>
+
                     {% endfor %}
 
-                    <li class="page-item {{ page >= pages ? 'disabled' : '' }}">
-                        {% if page < pages %}
+                    <li class="page-item {{ currentPage >= totalPages ? 'disabled' : '' }}">
+
+                        {% if currentPage < totalPages %}
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    page: page + 1
+                                    offset: next
                                 }) }}"
                             >
                                 Next
@@ -283,6 +294,7 @@
                                 Next
                             </span>
                         {% endif %}
+
                     </li>
 
                 </ul>
