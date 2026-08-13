@@ -17,32 +17,42 @@ use App\Entity\Manufacturer;
 final class ManufacturerController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-public function index(
-    Request $request,
-    ManufacturerRepository $manufacturerRepository
-): Response {
-    $status = $request->query->get('status', 'active');
-    $query = trim((string) $request->query->get('q', ''));
-    $page = max(1, $request->query->getInt('page', 1));
+    public function index(
+        Request $request,
+        ManufacturerRepository $manufacturerRepository
+    ): Response {
+        $status = $request->query->get('status', 'active');
+        $query = trim((string) $request->query->get('q', ''));
+        $offset = max(0, $request->query->getInt('offset', 0));
 
-    $isActive = $status !== 'inactive';
+        $isActive = $status !== 'inactive';
 
-    $result = $manufacturerRepository->findByFilters(
-        $isActive,
-        $query,
-        $page,
-        10
-    );
+        $perPage = ManufacturerRepository::MANUFACTURERS_PER_PAGE;
 
-    return $this->render('manufacturer/index.html.twig', [
-        'manufacturers' => $result['items'],
-        'status' => $isActive ? 'active' : 'inactive',
-        'query' => $query,
-        'page' => $result['page'],
-        'pages' => $result['pages'],
-        'total' => $result['total'],
-    ]);
-}
+        $manufacturers = $manufacturerRepository->getManufacturerPaginator(
+            $isActive,
+            $query,
+            $offset
+        );
+
+        $currentPage = intdiv($offset, $perPage) + 1;
+
+        $totalPages = max(
+            1,
+            (int) ceil(count($manufacturers) / $perPage)
+        );
+
+        return $this->render('manufacturer/index.html.twig', [
+            'manufacturers' => $manufacturers,
+            'status' => $isActive ? 'active' : 'inactive',
+            'query' => $query,
+            'previous' => $offset - $perPage,
+            'next' => $offset + $perPage,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+        ]);
+    }
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function create(
         Request $request,
