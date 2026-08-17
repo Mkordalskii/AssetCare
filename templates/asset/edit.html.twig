@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit {{ asset.name }} | AssetCare{% endblock %}
+
+{% block body %}
+    <div class="mb-4">
+        <h1>Edit asset</h1>
+
+        <p class="text-muted">
+            Update information about {{ asset.name }}.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.name) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.category) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.manufacturer) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.model) }}
+                </div>
+            </div>
+
+            {{ form_row(form.serialNumber) }}
+            {{ form_row(form.description) }}
+
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form_row(form.purchaseDate) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.purchasePrice) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.warrantyExpiresAt) }}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                {{ form_widget(form.save) }}
+
+                <a href="{{ path('app_asset_index') }}" class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

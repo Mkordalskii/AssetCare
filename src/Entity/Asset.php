@@ -25,7 +25,7 @@ class Asset
         max: 150,
         maxMessage: 'Asset name cannot exceed {{ limit }} characters.',
     )]
-    private string $name;
+    private ?string $name = null;
 
     #[ORM\Column(length: 150, nullable: true)]
     #[Assert\Length(max: 150)]
@@ -42,6 +42,10 @@ class Asset
     private ?DateTimeImmutable $purchaseDate = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 2, nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^\d{1,10}(?:\.\d{1,2})?$/',
+        message: 'Enter a valid non-negative price with up to 2 decimal places.',
+    )]
     private ?string $purchasePrice = null;
 
     #[ORM\Column(nullable: true)]
@@ -58,14 +62,17 @@ class Asset
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private AssetCategory $category;
+    #[Assert\NotNull(message: 'Asset category is required.')]
+    private ?AssetCategory $category = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Manufacturer $manufacturer = null;
 
-    public function __construct(string $name, AssetCategory $category)
-    {
+    public function __construct(
+        ?string $name = null,
+        ?AssetCategory $category = null,
+    ) {
         $this->name = $name;
         $this->category = $category;
         $this->createdAt = new DateTimeImmutable();
@@ -76,7 +83,7 @@ class Asset
         return $this->id;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -194,12 +201,12 @@ class Asset
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function getCategory(): AssetCategory
+    public function getCategory(): ?AssetCategory
     {
         return $this->category;
     }
 
-    public function setCategory(AssetCategory $category): static
+    public function setCategory(?AssetCategory $category): static
     {
         $this->category = $category;
 
