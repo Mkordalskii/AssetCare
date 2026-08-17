@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use App\Repository\ManufacturerRepository;
 use App\Entity\Manufacturer;
-use Symfony\Component\Routing\RouterInterface;
+use App\Repository\ManufacturerRepository;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ManufacturerControllerTest extends WebTestCase
 {
@@ -18,6 +17,77 @@ final class ManufacturerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', 'Manufacturers');
+    }
+
+    public function testManufacturerPaginationUsesPageParameter(): void
+    {
+        $client = static::createClient();
+        $entityManager = static::getContainer()->get('doctrine')->getManager();
+        $prefix = 'Pagination-' . bin2hex(random_bytes(4));
+
+        for ($number = 1; $number <= 11; ++$number) {
+            $manufacturer = new Manufacturer();
+            $manufacturer->setName(sprintf(
+                '%s %02d',
+                $prefix,
+                $number,
+            ));
+            $entityManager->persist($manufacturer);
+        }
+
+        $entityManager->flush();
+
+        $crawler = $client->request(
+            'GET',
+            '/manufacturers?q=' . $prefix . '&page=1',
+        );
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(10, $crawler->filter('tbody tr'));
+        self::assertSelectorExists('[aria-current="page"]');
+        self::assertSelectorTextContains('[aria-current="page"]', '1');
+        self::assertSelectorExists('a[href*="page=2"]');
+
+        $crawler = $client->request(
+            'GET',
+            '/manufacturers?q=' . $prefix . '&page=2',
+        );
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filter('tbody tr'));
+        self::assertSelectorTextContains('[aria-current="page"]', '2');
+        self::assertSelectorTextContains(
+            'tbody',
+            $prefix . ' 11',
+        );
+    }
+
+    public function testManufacturerPaginationRedirectsPastLastPage(): void
+    {
+        $client = static::createClient();
+        $entityManager = static::getContainer()->get('doctrine')->getManager();
+        $prefix = 'Pagination-Boundary-' . bin2hex(random_bytes(4));
+
+        for ($number = 1; $number <= 11; ++$number) {
+            $manufacturer = new Manufacturer();
+            $manufacturer->setName(sprintf(
+                '%s %02d',
+                $prefix,
+                $number,
+            ));
+            $entityManager->persist($manufacturer);
+        }
+
+        $entityManager->flush();
+
+        $client->request(
+            'GET',
+            '/manufacturers?q=' . $prefix . '&page=999',
+        );
+
+        self::assertResponseRedirects(
+            '/manufacturers?status=active&q=' . $prefix . '&page=2',
+        );
     }
 
     public function testCreatePageIsSuccessful(): void
@@ -72,6 +142,12 @@ final class ManufacturerControllerTest extends WebTestCase
             '.alert-success',
             'Manufacturer was created successfully.'
         );
+
+        $client->request(
+            'GET',
+            '/manufacturers?q=Test%20Manufacturer',
+        );
+        self::assertResponseIsSuccessful();
 
         self::assertSelectorTextContains(
             'body',
@@ -191,7 +267,7 @@ final class ManufacturerControllerTest extends WebTestCase
      */
         $crawler = $client->request(
             'GET',
-            '/manufacturers'
+            '/manufacturers?q=Manufacturer%20To%20Delete'
         );
 
         self::assertResponseIsSuccessful();
@@ -241,7 +317,7 @@ final class ManufacturerControllerTest extends WebTestCase
      */
         $crawler = $client->request(
             'GET',
-            '/manufacturers?status=inactive'
+            '/manufacturers?status=inactive&q=Manufacturer%20To%20Delete'
         );
 
         self::assertResponseIsSuccessful();

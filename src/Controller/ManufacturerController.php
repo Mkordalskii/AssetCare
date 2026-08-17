@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Repository\ManufacturerRepository;
+use App\Entity\Manufacturer;
+use App\Form\ManufacturerType;
+use App\Service\ManufacturerListService;
+use App\Service\ManufacturerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Form\ManufacturerType;
-use App\Service\ManufacturerService;
-use Symfony\Component\HttpFoundation\Request;
-use App\Entity\Manufacturer;
 
 #[Route('/manufacturers', name: 'app_manufacturer_')]
 final class ManufacturerController extends AbstractController
@@ -19,40 +19,33 @@ final class ManufacturerController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(
         Request $request,
-        ManufacturerRepository $manufacturerRepository
+        ManufacturerListService $manufacturerListService,
     ): Response {
         $status = $request->query->get('status', 'active');
         $query = trim((string) $request->query->get('q', ''));
-        $offset = max(0, $request->query->getInt('offset', 0));
-
         $isActive = $status !== 'inactive';
-
-        $perPage = ManufacturerRepository::MANUFACTURERS_PER_PAGE;
-
-        $manufacturers = $manufacturerRepository->getManufacturerPaginator(
+        $requestedPage = max(1, $request->query->getInt('page', 1));
+        $manufacturerPage = $manufacturerListService->getPage(
             $isActive,
             $query,
-            $offset
+            $requestedPage,
         );
 
-        $currentPage = intdiv($offset, $perPage) + 1;
-
-        $totalPages = max(
-            1,
-            (int) ceil(count($manufacturers) / $perPage)
-        );
+        if ($manufacturerPage->currentPage !== $requestedPage) {
+            return $this->redirectToRoute('app_manufacturer_index', [
+                'status' => $isActive ? 'active' : 'inactive',
+                'q' => $query,
+                'page' => $manufacturerPage->currentPage,
+            ]);
+        }
 
         return $this->render('manufacturer/index.html.twig', [
-            'manufacturers' => $manufacturers,
+            'manufacturerPage' => $manufacturerPage,
             'status' => $isActive ? 'active' : 'inactive',
             'query' => $query,
-            'previous' => $offset - $perPage,
-            'next' => $offset + $perPage,
-            'currentPage' => $currentPage,
-            'totalPages' => $totalPages,
-            'perPage' => $perPage,
         ]);
     }
+
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function create(
         Request $request,

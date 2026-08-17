@@ -28,7 +28,7 @@ final class ManufacturerService
 
     public function deactivateManufacturer(Manufacturer $manufacturer): void
     {
-        $manufacturer->setIsActive(false);
+        $manufacturer->deactivate();
         $manufacturer->setUpdatedAt(new DateTimeImmutable());
 
         $this->entityManager->flush();
@@ -36,7 +36,7 @@ final class ManufacturerService
 
     public function activateManufacturer(Manufacturer $manufacturer): void
     {
-        $manufacturer->setIsActive(true);
+        $manufacturer->activate();
         $manufacturer->setUpdatedAt(new DateTimeImmutable());
 
         $this->entityManager->flush();

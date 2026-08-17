@@ -94,12 +94,12 @@
     </form>
 
     <p class="text-muted">
-        {{ manufacturers|length }}
-        manufacturer{{ manufacturers|length == 1 ? '' : 's' }}
+        {{ manufacturerPage.totalItems }}
+        manufacturer{{ manufacturerPage.totalItems == 1 ? '' : 's' }}
         found.
     </p>
 
-    {% if manufacturers is empty %}
+    {% if manufacturerPage.totalItems == 0 %}
 
         <div class="alert alert-info">
             {% if query %}
@@ -127,7 +127,7 @@
                 </thead>
 
                 <tbody>
-                    {% for manufacturer in manufacturers %}
+                    {% for manufacturer in manufacturerPage.items %}
 
                         <tr>
                             <td>
@@ -229,22 +229,22 @@
             </table>
         </div>
 
-        {% if totalPages > 1 %}
+        {% if manufacturerPage.totalPages > 1 %}
             <nav
                 class="mt-4"
                 aria-label="Manufacturer pagination"
             >
                 <ul class="pagination">
 
-                    <li class="page-item {{ currentPage <= 1 ? 'disabled' : '' }}">
+                    <li class="page-item {{ not manufacturerPage.hasPreviousPage ? 'disabled' : '' }}">
 
-                        {% if previous >= 0 %}
+                        {% if manufacturerPage.hasPreviousPage %}
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    offset: previous
+                                    page: manufacturerPage.currentPage - 1
                                 }) }}"
                             >
                                 Previous
@@ -257,18 +257,16 @@
 
                     </li>
 
-                    {% for pageNumber in 1..totalPages %}
-
-                        {% set pageOffset = (pageNumber - 1) * perPage %}
-
-                        <li class="page-item {{ pageNumber == currentPage ? 'active' : '' }}">
+                    {% for pageNumber in 1..manufacturerPage.totalPages %}
+                        <li class="page-item {{ pageNumber == manufacturerPage.currentPage ? 'active' : '' }}">
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    offset: pageOffset
+                                    page: pageNumber
                                 }) }}"
+                                {% if pageNumber == manufacturerPage.currentPage %}aria-current="page"{% endif %}
                             >
                                 {{ pageNumber }}
                             </a>
@@ -276,15 +274,15 @@
 
                     {% endfor %}
 
-                    <li class="page-item {{ currentPage >= totalPages ? 'disabled' : '' }}">
+                    <li class="page-item {{ not manufacturerPage.hasNextPage ? 'disabled' : '' }}">
 
-                        {% if currentPage < totalPages %}
+                        {% if manufacturerPage.hasNextPage %}
                             <a
                                 class="page-link"
                                 href="{{ path('app_manufacturer_index', {
                                     status: status,
                                     q: query,
-                                    offset: next
+                                    page: manufacturerPage.currentPage + 1
                                 }) }}"
                             >
                                 Next
