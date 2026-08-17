@@ -8,7 +8,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
 #[Exclude]
-final readonly class ManufacturerPage
+final readonly class PaginatedPage
 {
     public function __construct(
         public Paginator $items,

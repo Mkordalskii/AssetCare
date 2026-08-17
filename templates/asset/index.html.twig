@@ -1,0 +1,224 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assets | AssetCare{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Assets</h1>
+            <p class="text-muted mb-0">Manage your assets.</p>
+        </div>
+
+        <a href="{{ path('app_asset_create') }}" class="btn btn-primary">
+            Add asset
+        </a>
+    </div>
+
+    <div class="mb-4">
+        <a
+            href="{{ path('app_asset_index', {
+                status: 'active',
+                q: query,
+                category: selectedCategory,
+                manufacturer: selectedManufacturer
+            }) }}"
+            class="btn {{ status == 'active' ? 'btn-primary' : 'btn-outline-primary' }}"
+        >
+            Active
+        </a>
+        <a
+            href="{{ path('app_asset_index', {
+                status: 'inactive',
+                q: query,
+                category: selectedCategory,
+                manufacturer: selectedManufacturer
+            }) }}"
+            class="btn {{ status == 'inactive' ? 'btn-primary' : 'btn-outline-primary' }}"
+        >
+            Inactive
+        </a>
+    </div>
+
+    <form method="get" action="{{ path('app_asset_index') }}" class="row g-2 mb-4">
+        <input type="hidden" name="status" value="{{ status }}">
+
+        <div class="col-md-3">
+            <input
+                type="search"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="Search assets..."
+            >
+        </div>
+        <div class="col-md-3">
+            <select name="category" class="form-select">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option
+                        value="{{ category.id }}"
+                        {{ selectedCategory == category.id ? 'selected' : '' }}
+                    >
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="manufacturer" class="form-select">
+                <option value="">All manufacturers</option>
+                {% for manufacturer in manufacturers %}
+                    <option
+                        value="{{ manufacturer.id }}"
+                        {{ selectedManufacturer == manufacturer.id ? 'selected' : '' }}
+                    >
+                        {{ manufacturer.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Filter</button>
+        </div>
+        <div class="col-auto">
+            <a
+                href="{{ path('app_asset_index', {status: status}) }}"
+                class="btn btn-outline-secondary"
+            >
+                Clear
+            </a>
+        </div>
+    </form>
+
+    <p class="text-muted">
+        {{ assetPage.totalItems }} asset{{ assetPage.totalItems == 1 ? '' : 's' }} found.
+    </p>
+
+    {% if assetPage.totalItems == 0 %}
+        <div class="alert alert-info">No assets were found.</div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Manufacturer</th>
+                        <th>Model</th>
+                        <th>Serial number</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assetPage.items %}
+                        <tr>
+                            <td>{{ asset.name }}</td>
+                            <td>{{ asset.category.name }}</td>
+                            <td>{{ asset.manufacturer ? asset.manufacturer.name : '—' }}</td>
+                            <td>{{ asset.model ?? '—' }}</td>
+                            <td>{{ asset.serialNumber ?? '—' }}</td>
+                            <td class="text-end">
+                                {% if asset.isActive %}
+                                    <a
+                                        href="{{ path('app_asset_edit', {id: asset.id}) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Edit
+                                    </a>
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_asset_delete', {id: asset.id}) }}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to deactivate this asset?');"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('delete_asset_' ~ asset.id) }}"
+                                        >
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_asset_restore', {id: asset.id}) }}"
+                                        class="d-inline"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('restore_asset_' ~ asset.id) }}"
+                                        >
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            Restore
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if assetPage.totalPages > 1 %}
+            <nav class="mt-4" aria-label="Asset pagination">
+                <ul class="pagination">
+                    <li class="page-item {{ not assetPage.hasPreviousPage ? 'disabled' : '' }}">
+                        {% if assetPage.hasPreviousPage %}
+                            <a
+                                class="page-link"
+                                href="{{ path('app_asset_index', {
+                                    status: status,
+                                    q: query,
+                                    category: selectedCategory,
+                                    manufacturer: selectedManufacturer,
+                                    page: assetPage.currentPage - 1
+                                }) }}"
+                            >Previous</a>
+                        {% else %}
+                            <span class="page-link">Previous</span>
+                        {% endif %}
+                    </li>
+
+                    {% for pageNumber in 1..assetPage.totalPages %}
+                        <li class="page-item {{ pageNumber == assetPage.currentPage ? 'active' : '' }}">
+                            <a
+                                class="page-link"
+                                href="{{ path('app_asset_index', {
+                                    status: status,
+                                    q: query,
+                                    category: selectedCategory,
+                                    manufacturer: selectedManufacturer,
+                                    page: pageNumber
+                                }) }}"
+                                {% if pageNumber == assetPage.currentPage %}aria-current="page"{% endif %}
+                            >
+                                {{ pageNumber }}
+                            </a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {{ not assetPage.hasNextPage ? 'disabled' : '' }}">
+                        {% if assetPage.hasNextPage %}
+                            <a
+                                class="page-link"
+                                href="{{ path('app_asset_index', {
+                                    status: status,
+                                    q: query,
+                                    category: selectedCategory,
+                                    manufacturer: selectedManufacturer,
+                                    page: assetPage.currentPage + 1
+                                }) }}"
+                            >Next</a>
+                        {% else %}
+                            <span class="page-link">Next</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+    {% endif %}
+{% endblock %}

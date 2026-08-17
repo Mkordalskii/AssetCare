@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Dto\ManufacturerPage;
+use App\Dto\PaginatedPage;
 use App\Repository\ManufacturerRepository;
 
 final readonly class ManufacturerListService
@@ -20,7 +20,7 @@ final readonly class ManufacturerListService
         bool $isActive,
         string $query,
         int $requestedPage,
-    ): ManufacturerPage {
+    ): PaginatedPage {
         $requestedPage = max(1, $requestedPage);
         $paginator = $this->manufacturerRepository->getManufacturerPaginator(
             $isActive,
@@ -45,7 +45,7 @@ final readonly class ManufacturerListService
             );
         }
 
-        return new ManufacturerPage(
+        return new PaginatedPage(
             $paginator,
             $totalItems,
             $currentPage,

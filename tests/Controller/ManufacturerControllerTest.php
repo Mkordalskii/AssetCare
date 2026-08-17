@@ -234,6 +234,7 @@ final class ManufacturerControllerTest extends WebTestCase
     public function testDeleteAndRestoreManufacturer(): void
     {
         $client = static::createClient();
+        $manufacturerName = 'Manufacturer To Delete ' . bin2hex(random_bytes(4));
 
         /*
      * ARRANGE
@@ -246,7 +247,7 @@ final class ManufacturerControllerTest extends WebTestCase
         $manufacturer = new Manufacturer();
 
         $manufacturer
-            ->setName('Manufacturer To Delete')
+            ->setName($manufacturerName)
             ->setWebsite('https://delete-test.example.com')
             ->setSupportEmail('delete@example.com')
             ->setSupportPhone('+49 333 333333');
@@ -267,7 +268,7 @@ final class ManufacturerControllerTest extends WebTestCase
      */
         $crawler = $client->request(
             'GET',
-            '/manufacturers?q=Manufacturer%20To%20Delete'
+            '/manufacturers?q=' . urlencode($manufacturerName)
         );
 
         self::assertResponseIsSuccessful();
@@ -317,7 +318,7 @@ final class ManufacturerControllerTest extends WebTestCase
      */
         $crawler = $client->request(
             'GET',
-            '/manufacturers?status=inactive&q=Manufacturer%20To%20Delete'
+            '/manufacturers?status=inactive&q=' . urlencode($manufacturerName)
         );
 
         self::assertResponseIsSuccessful();
