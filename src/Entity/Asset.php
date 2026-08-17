@@ -1,11 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AssetRepository;
-use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
 #[ORM\Table(name: 'asset')]
@@ -17,12 +20,19 @@ class Asset
     private ?int $id = null;
 
     #[ORM\Column(length: 150)]
+    #[Assert\NotBlank(message: 'Asset name is required.')]
+    #[Assert\Length(
+        max: 150,
+        maxMessage: 'Asset name cannot exceed {{ limit }} characters.',
+    )]
     private string $name;
 
     #[ORM\Column(length: 150, nullable: true)]
+    #[Assert\Length(max: 150)]
     private ?string $model = null;
 
     #[ORM\Column(length: 150, nullable: true)]
+    #[Assert\Length(max: 150)]
     private ?string $serialNumber = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -58,8 +68,9 @@ class Asset
     {
         $this->name = $name;
         $this->category = $category;
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
+
     public function getId(): ?int
     {
         return $this->id;
