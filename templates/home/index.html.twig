@@ -1,17 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}AssetCare!{% endblock %}
+{% block title %}Home | AssetCare{% endblock %}
 
 {% block body %}
-    <main class="container py-5">
-        <h1>AssetCare</h1>
+    <section class="p-4 p-md-5 mb-4 bg-primary-subtle rounded-4" aria-labelledby="home-title">
+        <span class="badge text-bg-primary mb-3">AssetCare</span>
+        <h1 id="home-title" class="display-5 fw-bold">Your assets, all in one place.</h1>
+        <p class="lead text-body-secondary mb-4">Keep your homes, vehicles and devices organized. Manage asset details and their manufacturers from one workspace.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ path('app_asset_create') }}" class="btn btn-primary btn-lg">Add asset</a>
+            <a href="{{ path('app_asset_index') }}" class="btn btn-outline-primary btn-lg">Browse assets</a>
+        </div>
+    </section>
 
-        <p>
-            Smart maintenance manager for homes, vehicles, devices and other assets.
-        </p>
-
-        <p>
-            The application is running correctly.
-        </p>
-    </main>
+    <section aria-labelledby="workspace-title">
+        <h2 id="workspace-title" class="h4 mb-3">Your workspace</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <article class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex flex-column align-items-start">
+                        <h3 class="h5 card-title">Assets</h3>
+                        <p class="card-text text-body-secondary">Browse your inventory, update asset details and find items by category or manufacturer.</p>
+                        <a href="{{ path('app_asset_index') }}" class="btn btn-outline-primary mt-auto">Manage assets <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6">
+                <article class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex flex-column align-items-start">
+                        <h3 class="h5 card-title">Manufacturers</h3>
+                        <p class="card-text text-body-secondary">Maintain your manufacturer directory and keep the brands behind your assets organized.</p>
+                        <a href="{{ path('app_manufacturer_index') }}" class="btn btn-outline-primary mt-auto">Manage manufacturers <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
 {% endblock %}

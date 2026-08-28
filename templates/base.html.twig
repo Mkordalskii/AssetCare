@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>
 			{% block title %}AssetCare
 			{% endblock %}
@@ -21,12 +22,33 @@
 			<script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
 		{% endif %}
 	</head>
-	<body>
-		<header class="container py-3 border-bottom">
-			<h2>AssetCare</h2>
-		</header>
+	<body class="bg-body-tertiary d-flex flex-column min-vh-100">
+        {% set current_route = app.request.attributes.get('_route')|default('') %}
+        <header>
+            <nav class="navbar navbar-expand-md bg-white border-bottom shadow-sm" aria-label="Main navigation">
+                <div class="container">
+                    <a class="navbar-brand fw-bold text-primary" href="{{ path('app_home') }}">AssetCare</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <ul class="navbar-nav ms-auto">
+                            {% for item in [
+                                {label: 'Home', route: 'app_home', active: current_route == 'app_home'},
+                                {label: 'Assets', route: 'app_asset_index', active: current_route starts with 'app_asset_'},
+                                {label: 'Manufacturers', route: 'app_manufacturer_index', active: current_route starts with 'app_manufacturer_'}
+                            ] %}
+                                <li class="nav-item">
+                                    <a class="nav-link{{ item.active ? ' active fw-semibold' : '' }}" href="{{ path(item.route) }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
 
-		<main class="container py-4">
+		<main class="container py-4 py-md-5 flex-grow-1">
 			{% for message in app.flashes('success') %}
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
 					{{ message }}
@@ -37,7 +59,7 @@
 			{% block body %}{% endblock %}
 		</main>
 
-		<footer class="container py-4 border-top mt-5 text-center text-muted">
+		<footer class="container py-4 border-top text-center text-muted">
 			©
 			{{ "now"|date("Y") }}
 			AssetCare
