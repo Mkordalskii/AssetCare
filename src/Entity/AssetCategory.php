@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\AssetCategoryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AssetCategoryRepository::class)]
 class AssetCategory
@@ -15,12 +16,15 @@ class AssetCategory
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Category name is required.')]
+    #[Assert\Length(max: 100)]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\Length(max: 100)]
     private ?string $icon = null;
 
     #[ORM\Column]

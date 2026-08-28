@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+{% block title %}Categories | AssetCare{% endblock %}
+
+{% block body %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1>Categories</h1>
+            <p class="text-muted mb-0">Organize your assets by category.</p>
+        </div>
+        <a class="btn btn-primary" href="{{ path('app_asset_category_create') }}">Add category</a>
+    </div>
+    <div class="d-flex gap-2 mb-3">
+        {% for value, label in {active: 'Active', inactive: 'Inactive'} %}
+            <a href="{{ path('app_asset_category_index', {status: value, q: query}) }}" class="btn {{ status == value ? 'btn-primary' : 'btn-outline-primary' }}">{{ label }}</a>
+        {% endfor %}
+    </div>
+    <form method="get" action="{{ path('app_asset_category_index') }}" class="d-flex flex-wrap gap-2 mb-4">
+        <input type="hidden" name="status" value="{{ status }}">
+        <div>
+            <label for="category-search" class="visually-hidden">Search categories by name</label>
+            <input id="category-search" class="form-control" type="search" name="q" value="{{ query }}" placeholder="Search categories...">
+        </div>
+        <button class="btn btn-outline-primary">Search</button>
+        {% if query %}
+            <a class="btn btn-outline-secondary" href="{{ path('app_asset_category_index', {status: status}) }}">Clear</a>
+        {% endif %}
+    </form>
+    {% if categories is empty %}
+        <div class="alert alert-info">No categories found.</div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead><tr><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td>{{ category.description ?? '—' }}</td>
+                            <td class="text-end text-nowrap">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_asset_category_edit', {id: category.id}) }}">Edit</a>
+                                {% set action = category.isActive ? 'deactivate' : 'restore' %}
+                                <form class="d-inline" method="post" action="{{ path('app_asset_category_' ~ action, {id: category.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token(action ~ '_category_' ~ category.id) }}">
+                                    <button class="btn btn-sm {{ category.isActive ? 'btn-outline-danger' : 'btn-outline-success' }}">{{ category.isActive ? 'Deactivate' : 'Restore' }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

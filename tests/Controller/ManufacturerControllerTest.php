@@ -44,8 +44,8 @@ final class ManufacturerControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertCount(10, $crawler->filter('tbody tr'));
-        self::assertSelectorExists('[aria-current="page"]');
-        self::assertSelectorTextContains('[aria-current="page"]', '1');
+        self::assertSelectorExists('.pagination [aria-current="page"]');
+        self::assertSelectorTextContains('.pagination [aria-current="page"]', '1');
         self::assertSelectorExists('a[href*="page=2"]');
 
         $crawler = $client->request(
@@ -55,7 +55,7 @@ final class ManufacturerControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertCount(1, $crawler->filter('tbody tr'));
-        self::assertSelectorTextContains('[aria-current="page"]', '2');
+        self::assertSelectorTextContains('.pagination [aria-current="page"]', '2');
         self::assertSelectorTextContains(
             'tbody',
             $prefix . ' 11',
