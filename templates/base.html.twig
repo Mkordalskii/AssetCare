@@ -35,7 +35,8 @@
                         <ul class="navbar-nav ms-auto">
                             {% for item in [
                                 {label: 'Home', route: 'app_home', active: current_route == 'app_home'},
-                                {label: 'Assets', route: 'app_asset_index', active: current_route starts with 'app_asset_'},
+                                {label: 'Assets', route: 'app_asset_index', active: (current_route starts with 'app_asset_') and not (current_route starts with 'app_asset_category_')},
+                                {label: 'Categories', route: 'app_asset_category_index', active: current_route starts with 'app_asset_category_'},
                                 {label: 'Manufacturers', route: 'app_manufacturer_index', active: current_route starts with 'app_manufacturer_'}
                             ] %}
                                 <li class="nav-item">

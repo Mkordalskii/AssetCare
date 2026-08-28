@@ -16,7 +16,7 @@
     <section aria-labelledby="workspace-title">
         <h2 id="workspace-title" class="h4 mb-3">Your workspace</h2>
         <div class="row g-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <article class="card h-100 border-0 shadow-sm">
                     <div class="card-body p-4 d-flex flex-column align-items-start">
                         <h3 class="h5 card-title">Assets</h3>
@@ -25,12 +25,21 @@
                     </div>
                 </article>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <article class="card h-100 border-0 shadow-sm">
                     <div class="card-body p-4 d-flex flex-column align-items-start">
                         <h3 class="h5 card-title">Manufacturers</h3>
                         <p class="card-text text-body-secondary">Maintain your manufacturer directory and keep the brands behind your assets organized.</p>
                         <a href="{{ path('app_manufacturer_index') }}" class="btn btn-outline-primary mt-auto">Manage manufacturers <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex flex-column align-items-start">
+                        <h3 class="h5 card-title">Categories</h3>
+                        <p class="card-text text-body-secondary">Organize assets into categories and maintain your category directory.</p>
+                        <a href="{{ path('app_asset_category_index') }}" class="btn btn-outline-primary mt-auto">Manage categories <span aria-hidden="true">&rarr;</span></a>
                     </div>
                 </article>
             </div>
