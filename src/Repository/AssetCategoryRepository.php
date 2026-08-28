@@ -16,28 +16,19 @@ class AssetCategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, AssetCategory::class);
     }
 
-    //    /**
-    //     * @return AssetCategory[] Returns an array of AssetCategory objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /** @return AssetCategory[] */
+    public function search(bool $isActive, string $query): array
+    {
+        $builder = $this->createQueryBuilder('category')
+            ->andWhere('category.isActive = :active')
+            ->setParameter('active', $isActive)
+            ->orderBy('category.name', 'ASC');
 
-    //    public function findOneBySomeField($value): ?AssetCategory
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($query !== '') {
+            $builder->andWhere('LOWER(category.name) LIKE LOWER(:query)')
+                ->setParameter('query', '%' . $query . '%');
+        }
+
+        return $builder->getQuery()->getResult();
+    }
 }

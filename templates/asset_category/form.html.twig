@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+{% block title %}{{ isNew ? 'Add category' : 'Edit category' }} | AssetCare{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">{{ isNew ? 'Add category' : 'Edit category' }}</h1>
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-primary" type="submit">Save category</button>
+                    <a class="btn btn-outline-secondary" href="{{ path('app_asset_category_index') }}">Cancel</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
